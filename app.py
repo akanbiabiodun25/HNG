@@ -1,34 +1,42 @@
 #!flask/bin/python
-from flask import Flask, jsonify, request
-from datetime import datetime
-
+from flask import Flask, request, jsonify
+import datetime
+ 
 app = Flask(__name__)
-
-@app.route('/', methods=['GET'])
-def home():
-  return "Welcome! kindly use th api service at /api"
-
+ 
 @app.route('/api', methods=['GET'])
-def get_item():
-  """Retrieves all data of the item with the slack_name and track param"""
-  slack_name = request.args.get('slack_name')
-  current_day = datetime.now().strftime('%A')
-  utc_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-  track = request.args.get('track')
-  github_file_url = 'https://github.com/akanbiabiodun25/HNG/blob/main/api/app.py'
-  github_repo_url = "https://github.com/akanbiabiodun25/HNG"
-
-  res = {
-     "slack_name": slack_name,
-     "current_day": current_day,
-     "utc_time": utc_time,
-     "track": track,
-     "github_file_url": github_file_url,
-     "github_repo_url": github_repo_url,
-     "status_code": 200,
-  }
-  return jsonify(res)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+def get_info():
+     # Get query parameters from the URL
+     slack_name = request.args.get('slack_name')
+     track = request.args.get('track')
+ 
+     # Validate that both query parameters are provided
+     if not slack_name or not track:
+         return jsonify({"error": "Both slack_name and track are required."}), 400
+ 
+     # Get the current day of the week
+     current_day = datetime.datetime.utcnow().strftime('%A')
+ 
+     # Get the current UTC time with a +/- 2 minute window
+     current_utc_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+ 
+     # Construct GitHub URLs based on your repository and file names
+     github_repo_url = "https://github.com/akanbiabiodun25/HNG"
+     github_file_url = f"{github_repo_url}/blob/main/app.py"
+ 
+     # Create the JSON response
+     response_data = {
+         "slack_name": slack_name,
+         "current_day": current_day,
+         "utc_time": current_utc_time,
+         "track": track,
+         "github_file_url": github_file_url,
+         "github_repo_url": github_repo_url,
+         "status_code": 200
+     }
+ 
+     return jsonify(response_data)
+ 
+ if __name__ == '__main__':
+     app.run(debug=True)
 
